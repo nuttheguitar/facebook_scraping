@@ -1,0 +1,297 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "facebook-scraping"
+version = "3.0.0"
+description = "A Python package that monitors Facebook public groups for new posts and saves them to a local database using the Strategy Pattern"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Facebook Scraping Team", email = "contact@example.com"}
+]
+maintainers = [
+    {name = "Facebook Scraping Team", email = "contact@example.com"}
+]
+keywords = ["facebook", "scraping", "web-scraping", "data-collection", "social-media", "database"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Data Scientists",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Database",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.2",
+    "selenium>=4.15.2",
+    "webdriver-manager>=4.0.1",
+    "python-dotenv>=1.0.0",
+    "schedule>=1.2.0",
+    "lxml>=4.9.3",
+    "fake-useragent>=1.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+test = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.10.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/facebook-scraping"
+Documentation = "https://facebook-scraping.readthedocs.io"
+Repository = "https://github.com/yourusername/facebook-scraping.git"
+"Bug Tracker" = "https://github.com/yourusername/facebook-scraping/issues"
+"Source Code" = "https://github.com/yourusername/facebook-scraping"
+
+[project.scripts]
+facebook-scraper = "main:main"
+
+[project.gui-scripts]
+facebook-scraper-gui = "main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config", "database", "strategies"]
+
+[tool.hatch.build.targets.wheel.sources]
+"config" = "config"
+"database" = "database"
+"strategies" = "strategies"
+
+[tool.hatch.build.targets.wheel.include]
+"*.txt" = "*.txt"
+"*.md" = "*.md"
+"*.yml" = "*.yml"
+"*.yaml" = "*.yaml"
+"*.toml" = "*.toml"
+
+[tool.hatch.build.targets.wheel.exclude]
+"tests/*" = "tests/*"
+"*.pyc" = "*.pyc"
+"__pycache__/*" = "__pycache__/*"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=strategies",
+    "--cov=database", 
+    "--cov=config",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["strategies", "database", "config"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["config", "database", "strategies"]
+known_third_party = ["requests", "selenium", "beautifulsoup4", "lxml"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg",
+]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "selenium.*",
+    "beautifulsoup4.*",
+    "fake_useragent.*",
+    "schedule.*",
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv"]
+skips = ["B101", "B601"]
+
+[tool.pre-commit]
+repos = [
+    {
+        repo = "https://github.com/pre-commit/pre-commit-hooks",
+        rev = "v4.4.0",
+        hooks = [
+            {id = "trailing-whitespace"},
+            {id = "end-of-file-fixer"},
+            {id = "check-yaml"},
+            {id = "check-added-large-files"},
+            {id = "check-merge-conflict"},
+        ],
+    },
+    {
+        repo = "https://github.com/psf/black",
+        rev = "23.3.0",
+        hooks = [{id = "black"}],
+    },
+    {
+        repo = "https://github.com/pycqa/isort",
+        rev = "5.12.0",
+        hooks = [{id = "isort"}],
+    },
+    {
+        repo = "https://github.com/pycqa/flake8",
+        rev = "6.0.0",
+        hooks = [{id = "flake8"}],
+    },
+    {
+        repo = "https://github.com/pre-commit/mirrors-mypy",
+        rev = "v1.3.0",
+        hooks = [
+            {id = "mypy", additional_dependencies = ["types-requests"]},
+        ],
+    },
+]
+
+[tool.towncrier]
+package = "facebook_scraping"
+package_dir = "."
+filename = "CHANGELOG.md"
+directory = "changelog.d"
+title_format = "## [{version}] - {project_date}"
+template = "changelog.d/template.md"
+start_string = "<!-- towncrier release notes start -->"
+underlines = ["=", "-", "~"]
+issue_format = "`#{issue}`"
+categories = [
+    ["Features", "features"],
+    ["Bug Fixes", "bugfixes"],
+    ["Documentation", "documentation"],
+    ["Deprecations", "deprecations"],
+    ["Removals", "removals"],
+    ["Security", "security"],
+    ["Misc", "misc"],
+]
+
+# uv-specific configurations
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "pytest-mock>=3.10.0",
+]
+
+[tool.uv.sources]
+pypi = {url = "https://pypi.org/simple/"}
+
+[tool.uv.scripts]
+test = "pytest"
+test-cov = "pytest --cov=strategies --cov=database --cov=config --cov-report=html"
+format = "black ."
+format-check = "black --check ."
+lint = "flake8 ."
+type-check = "mypy ."
+install-dev = "uv add --dev pytest pytest-cov black flake8 mypy pre-commit pytest-mock"
+install-test = "uv add --dev pytest pytest-cov pytest-mock"
+install-docs = "uv add --dev sphinx sphinx-rtd-theme myst-parser"

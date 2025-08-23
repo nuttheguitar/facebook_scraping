@@ -1,0 +1,132 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules for LLM Service Project
+
+## Code Generation Rules
+
+### Test and Documentation Files
+- **DO NOT** automatically generate test files (e.g., `*_test.py`, `test_*.py`) when asked to write tests
+- **DO NOT** automatically generate README files when asked to write them
+- **DO NOT** create new test directories or test configuration files without explicit instruction
+- **DO NOT** assume test frameworks or testing patterns without user specification
+
+### When Asked About Tests or READMEs
+- Ask for clarification about what specific content or structure is needed
+- Request user to specify:
+  - Test framework preferences (pytest, unittest, etc.)
+  - Test coverage requirements
+  - Specific test cases or scenarios to cover
+  - README structure and content requirements
+  - Target audience and purpose
+
+### Code Quality
+- Follow existing code patterns and style in the project
+- Use the project's existing configuration (pyproject.toml, poetry, etc.)
+- Maintain consistency with existing naming conventions
+- Respect the project's architecture and module structure
+
+#### SOLID Principles for Python
+- **Single Responsibility Principle (SRP)**: Each class/module should have only one reason to change
+  - Keep classes focused on a single, well-defined purpose
+  - Split large classes into smaller, focused ones
+  - Use composition over inheritance when appropriate
+
+- **Open/Closed Principle (OCP)**: Open for extension, closed for modification
+  - Use abstract base classes and interfaces
+  - Implement strategy patterns for different behaviors
+  - Use dependency injection for flexibility
+
+- **Liskov Substitution Principle (LSP)**: Subtypes must be substitutable for their base types
+  - Ensure derived classes can replace base classes without breaking functionality
+  - Maintain consistent method signatures and behavior
+  - Don't override methods in ways that violate base class contracts
+
+- **Interface Segregation Principle (ISP)**: Clients shouldn't depend on interfaces they don't use
+  - Create small, focused interfaces rather than large, monolithic ones
+  - Use abstract base classes (ABC) for interface definitions
+  - Implement only the methods that are actually needed
+
+- **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concrete implementations
+  - Use dependency injection and abstract base classes
+  - Avoid hardcoding concrete class dependencies
+  - Design interfaces based on what clients need, not what implementations provide
+
+#### Python-Specific Best Practices
+- Use type hints consistently (PEP 484)
+- Follow PEP 8 style guidelines
+- Prefer composition over inheritance
+- Use dataclasses for simple data containers
+- Implement context managers for resource management
+- Use async/await patterns appropriately for I/O operations
+- Leverage Python's built-in features (generators, decorators, etc.)
+
+### File Creation
+- Only create files when explicitly requested
+- Ask for confirmation before creating new files or directories
+- Suggest alternatives when appropriate (e.g., modifying existing files vs. creating new ones)
+# Cursor Rules for LLM Service Project
+
+## Code Generation Rules
+
+### Test and Documentation Files
+- **DO NOT** automatically generate test files (e.g., `*_test.py`, `test_*.py`) when asked to write tests
+- **DO NOT** automatically generate README files when asked to write them
+- **DO NOT** create new test directories or test configuration files without explicit instruction
+- **DO NOT** assume test frameworks or testing patterns without user specification
+
+### When Asked About Tests or READMEs
+- Ask for clarification about what specific content or structure is needed
+- Request user to specify:
+  - Test framework preferences (pytest, unittest, etc.)
+  - Test coverage requirements
+  - Specific test cases or scenarios to cover
+  - README structure and content requirements
+  - Target audience and purpose
+
+### Code Quality
+- Follow existing code patterns and style in the project
+- Use the project's existing configuration (pyproject.toml, poetry, etc.)
+- Maintain consistency with existing naming conventions
+- Respect the project's architecture and module structure
+
+#### SOLID Principles for Python
+- **Single Responsibility Principle (SRP)**: Each class/module should have only one reason to change
+  - Keep classes focused on a single, well-defined purpose
+  - Split large classes into smaller, focused ones
+  - Use composition over inheritance when appropriate
+
+- **Open/Closed Principle (OCP)**: Open for extension, closed for modification
+  - Use abstract base classes and interfaces
+  - Implement strategy patterns for different behaviors
+  - Use dependency injection for flexibility
+
+- **Liskov Substitution Principle (LSP)**: Subtypes must be substitutable for their base types
+  - Ensure derived classes can replace base classes without breaking functionality
+  - Maintain consistent method signatures and behavior
+  - Don't override methods in ways that violate base class contracts
+
+- **Interface Segregation Principle (ISP)**: Clients shouldn't depend on interfaces they don't use
+  - Create small, focused interfaces rather than large, monolithic ones
+  - Use abstract base classes (ABC) for interface definitions
+  - Implement only the methods that are actually needed
+
+- **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concrete implementations
+  - Use dependency injection and abstract base classes
+  - Avoid hardcoding concrete class dependencies
+  - Design interfaces based on what clients need, not what implementations provide
+
+#### Python-Specific Best Practices
+- Use type hints consistently (PEP 484)
+- Follow PEP 8 style guidelines
+- Prefer composition over inheritance
+- Use dataclasses for simple data containers
+- Implement context managers for resource management
+- Use async/await patterns appropriately for I/O operations
+- Leverage Python's built-in features (generators, decorators, etc.)
+
+### File Creation
+- Only create files when explicitly requested
+- Ask for confirmation before creating new files or directories
+- Suggest alternatives when appropriate (e.g., modifying existing files vs. creating new ones)

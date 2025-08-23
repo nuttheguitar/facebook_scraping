@@ -1,38 +1,45 @@
 #!/usr/bin/env python3
 """
-Facebook Public Group Post Scraper
-Main entry point for the Facebook scraper with improved user experience.
+Facebook UI Screenshot Scraper
+Main entry point for capturing Facebook post screenshots with human behavior simulation.
 """
 
 import os
 import sys
 import argparse
 from dotenv import load_dotenv
+from strategies.facebook_scraper import FacebookUIScraper
 
 # Add the current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from strategies.facebook_scraper import FacebookScraper
-
 
 # Load environment variables
 load_dotenv()
 
 
 def main():
-    """Main function to run the Facebook scraper with improved user experience."""
+    """Main function to run the Facebook UI screenshot scraper."""
     parser = argparse.ArgumentParser(
-        description="Facebook Public Group Post Scraper",
+        description="Facebook UI Screenshot Scraper - Capture post screenshots with OCR-ready content",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
             Examples:
-            # Quick scrape of a Facebook group
-            python main.py --target-url "https://www.facebook.com/groups/example" --mode scrape
+            # Quick screenshot capture of a Facebook group
+            python main.py --target-url "https://www.facebook.com/groups/example" --max-posts 10
 
-            # Monitor a group continuously
-            python main.py --target-url "https://www.facebook.com/groups/example" --mode monitor
+            # Capture screenshots with authentication and profile persistence
+            python main.py --target-url "https://www.facebook.com/groups/example" --max-posts 20 --use-profile
 
-            # Scrape with custom settings
-            python main.py --target-url "https://www.facebook.com/groups/example" --max-posts 50 --fast-mode
+            # Capture screenshots without profile (fresh session each time)
+            python main.py --target-url "https://www.facebook.com/groups/example" --max-posts 20 --no-profile
+
+            # Custom database path
+            python main.py --target-url "https://www.facebook.com/groups/example" --db-path "my_facebook_data.db"
+
+            Profile Management:
+            --use-profile (default): Uses Chrome profile to save Facebook login sessions
+            --no-profile: Starts fresh each time without saving sessions
+            💡 With profiles enabled, you only need to login once!
 
             Environment Variables:
             FACEBOOK_EMAIL: Your Facebook email for authentication
@@ -51,14 +58,8 @@ def main():
     parser.add_argument(
         "--max-posts",
         type=int,
-        default=20,
-        help="Maximum posts to scrape per session (default: 20)",
-    )
-    parser.add_argument(
-        "--interval",
-        type=int,
-        default=30,
-        help="Check interval in minutes for monitoring mode (default: 30)",
+        default=10,
+        help="Maximum posts to capture screenshots (default: 10)",
     )
     parser.add_argument(
         "--db-path",
@@ -66,20 +67,16 @@ def main():
         help="Database path for storing scraped posts (default: facebook_posts.db)",
     )
     parser.add_argument(
-        "--mode",
-        choices=["scrape", "monitor"],
-        default="scrape",
-        help="Scraping mode: scrape once or monitor continuously (default: scrape)",
-    )
-    parser.add_argument(
-        "--fast-mode",
-        action="store_true",
-        help="Enable fast mode for quicker scraping (may increase detection risk)",
-    )
-    parser.add_argument(
-        "--use-existing-profile",
+        "--use-profile",
         default=True,
-        help="Use existing Chrome profile with Facebook login",
+        action="store_true",
+        help="Use Chrome profile for persistent Facebook sessions (default: True)",
+    )
+    parser.add_argument(
+        "--no-profile",
+        dest="use_profile",
+        action="store_false",
+        help="Disable Chrome profile usage (start fresh each time)",
     )
 
     args = parser.parse_args()
@@ -101,18 +98,25 @@ def main():
         return
 
     # Create Facebook scraper instance
-    scraper = FacebookScraper(db_path=args.db_path, fast_mode=args.fast_mode)
+    scraper = FacebookUIScraper(db_path=args.db_path)
 
     try:
-        # Setup driver
-        print("🔧 Setting up WebDriver...")
-        if not scraper.setup_driver(
-            headless=args.headless, use_existing_profile=args.use_existing_profile
-        ):
+        # Setup driver with profile management
+        if args.use_profile:
+            print("🔐 Setting up WebDriver with profile management for persistent Facebook sessions...")
+            print("💾 Your Facebook login will be saved and reused in future runs!")
+        else:
+            print("🔄 Setting up WebDriver without profile (fresh session each time)...")
+            
+        if not scraper.setup_driver(headless=args.headless):
             print("❌ Failed to setup WebDriver")
             return
 
-        print("✅ WebDriver setup completed")
+        if args.use_profile:
+            print("✅ WebDriver setup completed with profile management and human behavior simulation")
+            print("🔐 Your Facebook session will persist between runs!")
+        else:
+            print("✅ WebDriver setup completed with human behavior simulation")
 
         # Check for login credentials
         email = os.getenv("FACEBOOK_EMAIL")
@@ -131,66 +135,70 @@ def main():
                 "   Set FACEBOOK_EMAIL and FACEBOOK_PASSWORD environment variables for login"
             )
 
-        if args.mode == "scrape":
-            # One-time scraping
-            print(f"\n📊 Starting to scrape Facebook group: {target_url}")
-            print(f"📝 Max posts to scrape: {args.max_posts}")
+        # Start screenshot capture
+        print(f"\n📸 Starting to capture Facebook post screenshots: {target_url}")
+        print(f"📝 Max posts to capture: {args.max_posts}")
+        print("🔄 This will expand content and capture screenshots for OCR processing...")
 
-            posts = scraper.scrape_content(target_url, max_items=args.max_posts)
+        # Capture post screenshots
+        posts = scraper.scrape_posts(target_url, max_posts=args.max_posts)
 
-            if posts:
-                print(f"✅ Successfully scraped {len(posts)} posts!")
+        if posts:
+            print(f"✅ Successfully captured {len(posts)} post screenshots!")
 
-                # Save to database
-                if hasattr(scraper, "save_posts_to_database"):
-                    scraper.save_posts_to_database(posts)
-                    print(f"💾 Saved {len(posts)} posts to database: {args.db_path}")
+            # Save to database
+            if hasattr(scraper, "save_posts_to_database"):
+                saved_count = scraper.save_posts_to_database(posts)
+                print(f"💾 Saved {saved_count} posts to database: {args.db_path}")
 
-                # Export to JSON
-                if hasattr(scraper, "save_posts_to_json"):
-                    output_file = "scraped_facebook_posts.json"
-                    scraper.save_posts_to_json(posts, output_file)
+            # Export to JSON
+            if hasattr(scraper, "save_posts_to_json"):
+                output_file = "facebook_screenshots.json"
+                if scraper.save_posts_to_json(posts, output_file):
                     print(f"📄 Exported data to: {output_file}")
 
-                # Show sample data
-                print("\n📋 Sample scraped posts:")
-                for i, post in enumerate(posts[:3], 1):
-                    content_preview = (
-                        post.content[:100] + "..."
-                        if len(post.content) > 100
-                        else post.content
-                    )
-                    print(f"  {i}. {post.title or 'No title'}")
-                    print(f"     Content: {content_preview}")
-                    print(f"     URL: {post.url}")
-                    print()
+            # Show screenshot summary
+            if hasattr(scraper, "get_screenshot_summary"):
+                screenshot_stats = scraper.get_screenshot_summary()
+                print("\n📸 Screenshot Summary:")
+                print(f"   📁 Directory: {screenshot_stats.get('screenshot_dir', 'N/A')}")
+                print(f"   🖼️  Screenshots captured: {screenshot_stats.get('screenshots_found', 0)}")
+                print(f"   💾 Total size: {screenshot_stats.get('total_size_mb', 0)} MB")
 
-                # Show stats
-                if hasattr(scraper, "get_scraping_stats"):
-                    stats = scraper.get_scraping_stats()
-                    print(f"📊 Scraping statistics: {stats}")
-            else:
-                print("❌ No posts were scraped")
-                print("   This could be due to:")
-                print("   - Group is private or requires membership")
-                print("   - No posts available in the group")
-                print("   - Facebook's anti-scraping measures")
+            # Show sample data
+            print("\n📋 Sample captured posts:")
+            for i, post in enumerate(posts[:3], 1):
+                print(f"  {i}. Post ID: {post.get('post_id', 'N/A')}")
+                print(f"     Author: {post.get('author', 'N/A')}")
+                print(f"     Content: {post.get('content', 'N/A')[:100]}...")
+                print(f"     Screenshot: {post.get('screenshot_path', 'N/A')}")
+                print(f"     Timestamp: {post.get('timestamp', 'N/A')}")
+                print()
+
+            # Show comprehensive stats
+            if hasattr(scraper, "get_scraping_stats"):
+                stats = scraper.get_scraping_stats()
+                print("📊 Scraping Statistics:")
+                print(f"   🎯 Strategy: {stats.get('scraping_strategy', 'N/A')}")
+                print(f"   🔐 Authentication: {'✅ Yes' if stats.get('authentication_status') else '❌ No'}")
+                print(f"   🤖 Human Behavior: {'✅ Enabled' if stats.get('human_behavior_enabled') else '❌ Disabled'}")
+                print(f"   🚗 Driver Status: {'✅ Active' if stats.get('driver_active') else '❌ Inactive'}")
+                
+                # Show human behavior stats if available
+                if 'total_clicks' in stats:
+                    print(f"   🖱️  Total clicks: {stats.get('total_clicks', 0)}")
+                if 'total_scrolls' in stats:
+                    print(f"   📜 Total scrolls: {stats.get('total_scrolls', 0)}")
+                if 'session_duration' in stats:
+                    print(f"   ⏱️  Session duration: {stats.get('session_duration', 'N/A')}")
 
         else:
-            # Continuous monitoring
-            print(
-                f"\n📊 Starting continuous monitoring of Facebook group: {target_url}"
-            )
-            print(f"⏰ Check interval: {args.interval} minutes")
-            print(f"📝 Max posts per check: {args.max_posts}")
-            print("🛑 Press Ctrl+C to stop monitoring")
-            print()
-
-            scraper.monitor_group(
-                group_url=target_url,
-                interval_minutes=args.interval,
-                max_posts=args.max_posts,
-            )
+            print("❌ No post screenshots were captured")
+            print("   This could be due to:")
+            print("   - Group is private or requires membership")
+            print("   - No posts available in the group")
+            print("   - Facebook's anti-scraping measures")
+            print("   - Network or browser issues")
 
     except KeyboardInterrupt:
         print("\n🛑 Operation stopped by user")
@@ -200,8 +208,9 @@ def main():
             scraper.logger.error(f"Detailed error: {str(e)}", exc_info=True)
     finally:
         # Clean up
+        print("\n🧹 Cleaning up and closing scraper...")
         scraper.close()
-        print("🧹 Scraper cleaned up and closed")
+        print("✅ Scraper cleaned up and closed")
 
 
 if __name__ == "__main__":

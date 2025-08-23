@@ -5,11 +5,11 @@ Contains different scraping strategies and implementations.
 """
 
 from .base_scraper import BaseScraper
-from .facebook_scraper import FacebookScraper
+from .facebook_scraper import FacebookUIScraper
 from .google_scraper import GoogleScraper
 
 __all__ = [
     "BaseScraper",
-    "FacebookScraper",
+    "FacebookUIScraper",
     "GoogleScraper",
 ]

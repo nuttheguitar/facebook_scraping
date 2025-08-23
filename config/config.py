@@ -8,13 +8,28 @@ import os
 
 # Chrome Driver Configuration
 CHROME_DRIVER_PATHS = {
-    "mac": ["/Users/nuttakan.w/Downloads/chromedriver-mac-arm64/chromedriver"]
+    "mac": [
+        "/Users/nuttakan.w/Downloads/chromedriver-mac-arm64/chromedriver",
+        "/Users/nuttakan.w/Downloads/chromedriver-mac-x64/chromedriver",
+        "/Users/nuttakan.w/Downloads/chromedriver"
+    ]
 }
 
 # Chrome Browser Binary Paths
 CHROME_BINARY_PATHS = {
     "mac": [
         "/Users/nuttakan.w/Downloads/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    ]
+}
+
+# Chrome Profile Configuration
+CHROME_PROFILE_PATHS = {
+    "mac": [
+        os.path.expanduser("~/Library/Application Support/Google/Chrome/Default"),
+        os.path.expanduser("~/Library/Application Support/Google/Chrome/Profile 1"),
+        os.path.expanduser("~/Library/Application Support/Google/Chrome/Profile 2"),
+        os.path.expanduser("~/Downloads/chrome-mac-arm64/ChromeProfile"),
+        os.path.expanduser("~/ChromeProfile"),
     ]
 }
 
@@ -28,6 +43,8 @@ CHROME_OPTIONS = {
     "disable_blink_features": "AutomationControlled",
     "exclude_switches": ["enable-automation"],
     "use_automation_extension": False,
+    "use_profile": True,  # Enable profile usage
+    "profile_directory": "Default",  # Default profile directory name
 }
 
 
@@ -61,6 +78,17 @@ def find_chrome_binary():
     platform = get_system_platform()
 
     for path in CHROME_BINARY_PATHS[platform]:
+        if os.path.exists(path):
+            return path
+
+    return None
+
+
+def find_chrome_profile():
+    """Find an available Chrome profile path."""
+    platform = get_system_platform()
+
+    for path in CHROME_PROFILE_PATHS[platform]:
         if os.path.exists(path):
             return path
 

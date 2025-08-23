@@ -36,10 +36,18 @@ def main():
             # Custom database path
             python main.py --target-url "https://www.facebook.com/groups/example" --db-path "my_facebook_data.db"
 
+            # Disable post validation to capture all containers
+            python main.py --target-url "https://www.facebook.com/groups/example" --no-validate-posts
+
             Profile Management:
             --use-profile (default): Uses Chrome profile to save Facebook login sessions
             --no-profile: Starts fresh each time without saving sessions
             💡 With profiles enabled, you only need to login once!
+
+            Post Validation:
+            --validate-posts (default): Enable post validation to filter actual posts from comments
+            --no-validate-posts: Disable validation - capture all containers as posts
+            💡 Use --no-validate-posts when you want to see everything Facebook serves!
 
             Environment Variables:
             FACEBOOK_EMAIL: Your Facebook email for authentication
@@ -53,7 +61,10 @@ def main():
         help="Facebook group URL to scrape (overrides FACEBOOK_GROUP_URL env var)",
     )
     parser.add_argument(
-        "--headless", default=False, action="store_true", help="Run in headless mode (no browser UI)"
+        "--headless",
+        default=False,
+        action="store_true",
+        help="Run in headless mode (no browser UI)",
     )
     parser.add_argument(
         "--max-posts",
@@ -78,6 +89,12 @@ def main():
         action="store_false",
         help="Disable Chrome profile usage (start fresh each time)",
     )
+    parser.add_argument(
+        "--validate-posts",
+        default=True,
+        action="store_true",
+        help="Enable post validation to filter actual posts from comments (default: True)",
+    )
 
     args = parser.parse_args()
 
@@ -97,23 +114,31 @@ def main():
         )
         return
 
-    # Create Facebook scraper instance
-    scraper = FacebookUIScraper(db_path=args.db_path)
+    # Create Facebook scraper instance with validation control
+    scraper = FacebookUIScraper(
+        db_path=args.db_path, validate_posts=args.validate_posts
+    )
 
     try:
         # Setup driver with profile management
         if args.use_profile:
-            print("🔐 Setting up WebDriver with profile management for persistent Facebook sessions...")
+            print(
+                "🔐 Setting up WebDriver with profile management for persistent Facebook sessions..."
+            )
             print("💾 Your Facebook login will be saved and reused in future runs!")
         else:
-            print("🔄 Setting up WebDriver without profile (fresh session each time)...")
-            
+            print(
+                "🔄 Setting up WebDriver without profile (fresh session each time)..."
+            )
+
         if not scraper.setup_driver(headless=args.headless):
             print("❌ Failed to setup WebDriver")
             return
 
         if args.use_profile:
-            print("✅ WebDriver setup completed with profile management and human behavior simulation")
+            print(
+                "✅ WebDriver setup completed with profile management and human behavior simulation"
+            )
             print("🔐 Your Facebook session will persist between runs!")
         else:
             print("✅ WebDriver setup completed with human behavior simulation")
@@ -138,7 +163,16 @@ def main():
         # Start screenshot capture
         print(f"\n📸 Starting to capture Facebook post screenshots: {target_url}")
         print(f"📝 Max posts to capture: {args.max_posts}")
-        print("🔄 This will expand content and capture screenshots for OCR processing...")
+        print(
+            f"🔍 Post validation: {'✅ Enabled' if args.validate_posts else '❌ Disabled'}"
+        )
+        if args.validate_posts:
+            print("   Only actual posts will be processed (comments filtered out)")
+        else:
+            print("   All containers will be captured as posts (no filtering)")
+        print(
+            "🔄 This will expand content and capture screenshots for OCR processing..."
+        )
 
         # Capture post screenshots
         posts = scraper.scrape_posts(target_url, max_posts=args.max_posts)
@@ -146,51 +180,43 @@ def main():
         if posts:
             print(f"✅ Successfully captured {len(posts)} post screenshots!")
 
-            # Save to database
-            if hasattr(scraper, "save_posts_to_database"):
-                saved_count = scraper.save_posts_to_database(posts)
-                print(f"💾 Saved {saved_count} posts to database: {args.db_path}")
-
-            # Export to JSON
-            if hasattr(scraper, "save_posts_to_json"):
-                output_file = "facebook_screenshots.json"
-                if scraper.save_posts_to_json(posts, output_file):
-                    print(f"📄 Exported data to: {output_file}")
-
-            # Show screenshot summary
-            if hasattr(scraper, "get_screenshot_summary"):
-                screenshot_stats = scraper.get_screenshot_summary()
-                print("\n📸 Screenshot Summary:")
-                print(f"   📁 Directory: {screenshot_stats.get('screenshot_dir', 'N/A')}")
-                print(f"   🖼️  Screenshots captured: {screenshot_stats.get('screenshots_found', 0)}")
-                print(f"   💾 Total size: {screenshot_stats.get('total_size_mb', 0)} MB")
-
             # Show sample data
             print("\n📋 Sample captured posts:")
             for i, post in enumerate(posts[:3], 1):
                 print(f"  {i}. Post ID: {post.get('post_id', 'N/A')}")
-                print(f"     Author: {post.get('author', 'N/A')}")
-                print(f"     Content: {post.get('content', 'N/A')[:100]}...")
                 print(f"     Screenshot: {post.get('screenshot_path', 'N/A')}")
-                print(f"     Timestamp: {post.get('timestamp', 'N/A')}")
+                print(f"     Scraped at: {post.get('scraped_at', 'N/A')}")
+                print(
+                    f"     Container role: {post.get('container_info', {}).get('role', 'N/A')}"
+                )
+                print(
+                    f"     Container testid: {post.get('container_info', {}).get('data_testid', 'N/A')}"
+                )
                 print()
 
+            # Show screenshot summary
+            print("\n📸 Screenshot Summary:")
+            print(f"   📁 Directory: {scraper.screenshot_dir}")
+            print(f"   🖼️  Screenshots captured: {len(posts)}")
+
+            # Calculate total size of screenshots
+            total_size_mb = 0
+            for post in posts:
+                screenshot_path = post.get("screenshot_path")
+                if screenshot_path and os.path.exists(screenshot_path):
+                    total_size_mb += os.path.getsize(screenshot_path) / (1024 * 1024)
+            print(f"   💾 Total size: {total_size_mb:.2f} MB")
+
             # Show comprehensive stats
-            if hasattr(scraper, "get_scraping_stats"):
-                stats = scraper.get_scraping_stats()
-                print("📊 Scraping Statistics:")
-                print(f"   🎯 Strategy: {stats.get('scraping_strategy', 'N/A')}")
-                print(f"   🔐 Authentication: {'✅ Yes' if stats.get('authentication_status') else '❌ No'}")
-                print(f"   🤖 Human Behavior: {'✅ Enabled' if stats.get('human_behavior_enabled') else '❌ Disabled'}")
-                print(f"   🚗 Driver Status: {'✅ Active' if stats.get('driver_active') else '❌ Inactive'}")
-                
-                # Show human behavior stats if available
-                if 'total_clicks' in stats:
-                    print(f"   🖱️  Total clicks: {stats.get('total_clicks', 0)}")
-                if 'total_scrolls' in stats:
-                    print(f"   📜 Total scrolls: {stats.get('total_scrolls', 0)}")
-                if 'session_duration' in stats:
-                    print(f"   ⏱️  Session duration: {stats.get('session_duration', 'N/A')}")
+            print("📊 Scraping Statistics:")
+            print("   🎯 Strategy: Screenshot-only with scroll-find-capture logic")
+            print(
+                f"   🔐 Authentication: {'✅ Yes' if scraper.is_authenticated else '❌ No'}"
+            )
+            print("   🤖 Human Behavior: ✅ Enabled")
+            print(
+                f"   🚗 Driver Status: {'✅ Active' if scraper.driver else '❌ Inactive'}"
+            )
 
         else:
             print("❌ No post screenshots were captured")

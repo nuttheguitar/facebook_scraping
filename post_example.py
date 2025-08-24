@@ -1,0 +1,5 @@
+post_container = '''class="html-div xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl"'''
+post_text = '''class="xdj266r x14z9mp xat24cr x1lziwak x1vvkbs x126k92a"'''
+image_container = '''class="x1i10hfl xjbqb8w x1ejq31n x13faqbe x1vvkbs x126k92a x193iq5w"'''
+image_remaining = '''class="x17z8epw x579bpy x1s688f x2b8uid"'''
+image_link = '''class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xc5r6h4 xqeqjp1 x1phubyo x13fuv20 x18b5jzi x1q0q8m5 x1t7ytsu x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk xdl72j9 x2lah0s x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak x2lwn1j xeuugli xexx8yu xyri2b x18d9i69 x1c1uobl x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1fmog5m xu25z0z x140muxe xo1y3bh x1q0g3np x87ps6o x1lku1pv x1rg5ohu x1a2a7pz x1ey2m1c xtijo5x x1o0tod x10l6tqk x13vifvy x1pdlv7q"[role='link']'''

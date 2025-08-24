@@ -95,6 +95,12 @@ def main():
         action="store_true",
         help="Enable post validation to filter actual posts from comments (default: True)",
     )
+    parser.add_argument(
+        "--no-validate-posts",
+        dest="validate_posts",
+        action="store_false",
+        help="Disable post validation - capture all containers as posts",
+    )
 
     args = parser.parse_args()
 
